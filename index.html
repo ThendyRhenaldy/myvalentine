@@ -1,33 +1,3 @@
-<?php
-session_start();
-
-$tanggal_jadian = "2025-08-24"; // GANTI SESUAI TANGGAL KALIAN
-
-$start_date = new DateTime($tanggal_jadian);
-$today = new DateTime();
-$diff = $today->diff($start_date)->days;
-
-if(isset($_POST['login'])){
-    if($_POST['tanggal'] === $tanggal_jadian){
-        $_SESSION['valentine_login'] = true;
-    } else {
-        $error = "Hehehe salah 😝 Coba ingat lagi yaaa ❤️";
-    }
-}
-
-if(isset($_GET['logout'])){
-    session_destroy();
-    header("Location: index.php");
-    exit();
-}
-
-if(isset($_GET['open'])){
-    $_SESSION['opened']=true;
-    header("Location: index.php");
-    exit();
-}
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -61,8 +31,6 @@ color:#f1f1f1;
 50%{background-position:100% 50%;}
 100%{background-position:0% 50%;}
 }
-
-/* Floating Hearts */
 .heart{
 position:fixed;
 bottom:-50px;
@@ -73,8 +41,6 @@ z-index:0;
 @keyframes floatUp{
 to{transform:translateY(-110vh);opacity:0;}
 }
-
-/* Card */
 .card{
 background:rgba(255,255,255,0.18);
 backdrop-filter:blur(15px);
@@ -88,10 +54,7 @@ box-shadow:0 15px 40px rgba(0,0,0,0.2);
 position:relative;
 z-index:1;
 }
-body.dark .card{
-background:rgba(0,0,0,0.4);
-}
-
+body.dark .card{background:rgba(0,0,0,0.4);}
 input{
 width:100%;
 padding:12px;
@@ -100,7 +63,6 @@ border:none;
 margin-bottom:15px;
 text-align:center;
 }
-
 button{
 background:white;
 color:#ff6b81;
@@ -111,8 +73,6 @@ cursor:pointer;
 font-weight:600;
 margin:5px;
 }
-
-/* Toggle buttons */
 .toggle-btn,.music-btn{
 position:fixed;
 top:15px;
@@ -126,8 +86,6 @@ z-index:10;
 }
 .toggle-btn{right:15px;}
 .music-btn{left:15px;}
-
-/* Slider */
 .slider{
 position:relative;
 width:100%;
@@ -146,8 +104,6 @@ flex-shrink:0;
 object-fit:cover;
 max-height:280px;
 }
-
-/* Slide buttons */
 .slide-btn{
 position:absolute;
 top:50%;
@@ -163,8 +119,6 @@ font-weight:bold;
 }
 .slide-btn.left{left:10px;}
 .slide-btn.right{right:10px;}
-
-/* Capy images */
 .capy{
 position:absolute;
 width:150px;
@@ -173,12 +127,7 @@ z-index:2;
 }
 .capy.left{left:-30px;bottom:-30px;}
 .capy.right{right:-45px;top:-30px;}
-
-.bubu{
-    width:120px;
-}
-
-/* Envelope */
+.bubu{width:120px;}
 .envelope-wrapper{text-align:center;color:white;}
 .envelope{
 position:relative;
@@ -239,8 +188,6 @@ color:white;
 font-size:22px;
 z-index:4;
 }
-
-/* Clean Print Card */
 #printCard{
 display:none;
 width:600px;
@@ -268,6 +215,8 @@ margin-bottom:20px;
 <button class="toggle-btn" onclick="toggleDark()">🌙</button>
 
 <script>
+const tanggal_jadian="2025-08-24";
+
 function toggleMusic(){
 let music=document.getElementById("bgMusic");
 if(music.paused){music.play();}
@@ -275,7 +224,6 @@ else{music.pause();}
 }
 function toggleDark(){document.body.classList.toggle("dark");}
 
-// floating hearts
 for(let i=0;i<25;i++){
 let heart=document.createElement("div");
 heart.classList.add("heart");
@@ -285,10 +233,22 @@ heart.style.animationDuration=(5+Math.random()*5)+"s";
 heart.style.fontSize=(15+Math.random()*20)+"px";
 document.body.appendChild(heart);
 }
-</script>
 
-<?php if(!isset($_SESSION['opened'])): ?>
+function hitungHari(){
+const startDate=new Date(tanggal_jadian);
+const today=new Date();
+const diffTime=today-startDate;
+return Math.floor(diffTime/(1000*60*60*24));
+}
 
+function render(){
+const opened=localStorage.getItem("opened");
+const login=localStorage.getItem("valentine_login");
+document.body.innerHTML+=`<div id="content"></div>`;
+const content=document.getElementById("content");
+
+if(!opened){
+content.innerHTML=`
 <div class="envelope-wrapper">
 <h2 style="margin-bottom:20px;">For My Bubu 💌</h2>
 <img src="bubududu1.gif" class="bubu">
@@ -298,106 +258,88 @@ document.body.appendChild(heart);
 <div class="seal">❤</div>
 <div class="letter">From your Dudu 💌</div>
 </div>
-</div>
-
-<script>
-function openEnvelope(el){
-el.classList.add("open");
-setTimeout(()=>{window.location.href="?open=1";},1200);
+</div>`;
 }
-</script>
-
-<?php elseif(!isset($_SESSION['valentine_login'])): ?>
-
+else if(!login){
+content.innerHTML=`
 <div class="card">
 <h1>Masukkan Tanggal Jadian 💖</h1>
-<?php if(isset($error)) echo "<p>$error</p>"; ?>
-<form method="POST">
-<input type="date" name="tanggal" required>
-<button type="submit" name="login">Masuk 💌</button>
-</form>
-</div>
-
-<?php else: ?>
-
-<div class="card" id="valentineCard">
-
-<script>
-window.onload=function(){
-document.getElementById("bgMusic").play();
+<p id="error" style="color:white;"></p>
+<input type="date" id="tanggal">
+<button onclick="login()">Masuk 💌</button>
+</div>`;
 }
-</script>
-
+else{
+const diff=hitungHari();
+content.innerHTML=`
+<div class="card" id="valentineCard">
 <img src="capybara.png" class="capy right">
 <img src="bubududu1.gif" class="capy left">
-
 <h1>Happy Valentine Sayang 💖</h1>
-
 <div class="slider">
 <div class="slides" id="slides">
 <img src="foto1.jpg">
 <img src="foto2.jpg">
 <img src="foto3.jpg">
 </div>
-
 <button class="slide-btn left" onclick="prevSlide()">❮</button>
 <button class="slide-btn right" onclick="nextSlide()">❯</button>
 </div>
-
 <p>
-We’ve been together for <b><?php echo $diff; ?> days</b>🤍<br>
+We’ve been together for <b>${diff} days</b>🤍<br>
 And every single one of them has meant more to me because of you.  
 Thank you for walking this journey with me. Happy Valentine, I Love You 💕
 </p>
-
 <button onclick="downloadClean()">Download Clean Card 💌</button>
 <br><br>
-<a href="?logout" style="color:white;font-size:12px;">Masukin kertas ke Amplop</a>
-
+<a href="#" onclick="logout()" style="color:white;font-size:12px;">Masukin kertas ke Amplop</a>
 </div>
-
-<!-- CLEAN CARD -->
 <div id="printCard">
 <h1>Happy Valentine 💖</h1>
 <img src="foto1.jpg">
 <p>
-We’ve been together for <b><?php echo $diff; ?> days</b>🤍<br>
+We’ve been together for <b>${diff} days</b>🤍<br>
 And every single one of them has meant more to me because of you.  
 Thank you for walking this journey with me. Happy Valentine, I Love You 💕
 </p>
-</div>
+</div>`;
+startSlider();
+document.getElementById("bgMusic").play();
+}
+}
 
-<script>
-let index=0;
+function openEnvelope(el){
+el.classList.add("open");
+setTimeout(()=>{
+localStorage.setItem("opened",true);
+location.reload();
+},1200);
+}
+function login(){
+const t=document.getElementById("tanggal").value;
+if(t===tanggal_jadian){
+localStorage.setItem("valentine_login",true);
+location.reload();
+}else{
+document.getElementById("error").innerText="Hehehe salah 😝 Coba ingat lagi yaaa ❤️";
+}
+}
+function logout(){
+localStorage.clear();
+location.reload();
+}
+
+let index=0,autoSlide;
+function startSlider(){
 const slides=document.getElementById("slides");
 const total=slides.children.length;
-let autoSlide;
-
-function showSlide(){
-slides.style.transform="translateX(-"+(index*100)+"%)";
+function show(){slides.style.transform="translateX(-"+(index*100)+"%)";}
+window.nextSlide=function(){index=(index+1)%total;show();reset();}
+window.prevSlide=function(){index=(index-1+total)%total;show();reset();}
+function auto(){autoSlide=setInterval(()=>{index=(index+1)%total;show();},4000);}
+function reset(){clearInterval(autoSlide);auto();}
+auto();
 }
-function nextSlide(){
-index=(index+1)%total;
-showSlide();
-resetAuto();
-}
-function prevSlide(){
-index=(index-1+total)%total;
-showSlide();
-resetAuto();
-}
-function startAuto(){
-autoSlide=setInterval(()=>{
-index=(index+1)%total;
-showSlide();
-},4000);
-}
-function resetAuto(){
-clearInterval(autoSlide);
-startAuto();
-}
-startAuto();
-
 function downloadClean(){
 const card=document.getElementById("printCard");
 card.style.display="block";
@@ -409,9 +351,8 @@ link.click();
 card.style.display="none";
 });
 }
+render();
 </script>
-
-<?php endif; ?>
 
 </body>
 </html>
